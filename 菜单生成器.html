@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜单生成器 - 支持Excel下载</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        select, button {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #d1d9e6;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        select {
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .primary-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .primary-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .secondary-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .menu-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        .category-header {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .total-row {
+            background-color: #ecf0f1;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .total-count {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+        
+        .download-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .download-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .download-btn i {
+            font-size: 1.3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .control-group {
+                min-width: 100%;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+    <!-- 引入SheetJS库用于生成Excel文件 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>智能菜单生成器</h1>
+        <p class="description">根据老总是否参与和就餐人数自动生成合适的菜单。</p>
+    </header>
+    
+    <div class="controls">
+        <div class="control-group">
+            <h2>就餐条件设置</h2>
+            <label for="boss-attendance">老总是否参与就餐？</label>
+            <select id="boss-attendance">
+                <option value="participate">老总参与就餐</option>
+                <option value="not-participate">老总不参与就餐</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <h2>就餐人数设置</h2>
+            <label for="diner-count">请选择就餐人数</label>
+            <select id="diner-count">
+                <option value="6">6人</option>
+                <option value="7">7人</option>
+                <option value="8">8人</option>
+                <option value="9">9人</option>
+                <option value="10">10人</option>
+                <option value="11" selected>11人</option>
+                <option value="12">12人</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <h2>菜单操作</h2>
+            <button id="generate-btn" class="primary-btn">生成菜单</button>
+            <p class="note">请点击按钮，将根据您的选择生成菜单。</p>
+        </div>
+    </div>
+    
+    <div class="menu-container">
+        <h2>生成的菜单</h2>
+        <div id="menu-table-container">
+            <!-- 菜单表格将在这里动态生成 -->
+            <p style="text-align: center; color: #7f8c8d; padding: 30px;">请设置就餐条件并点击"生成菜单"按钮</p>
+        </div>
+    </div>
+    
+    <div class="download-section" id="download-section" style="display: none;">
+        <h2>下载菜单</h2>
+        <p style="margin-bottom: 20px;">菜单已生成，您可以下载Excel文件</p>
+        <button id="download-btn" class="download-btn">
+            <span>📥</span> 下载Excel菜单
+        </button>
+        <p class="note" style="margin-top: 15px;">下载的Excel文件将包含完整的菜单信息，可直接打印或分享。</p>
+    </div>
+    
+    <div class="footer">
+        <p>智能菜单生成器 © 2023 | 根据就餐条件和人数自动生成合适菜单</p>
+    </div>
+
+    <script>
+        // 菜品库数据
+        const dishes = {
+            "冷菜（荤）": ["牛腱子", "咸蟹", "白切鸡", "白切牛肚", "冻羊肉", "牛肉拼盘", "糟鸡", "猪舌", "糟鸭", "糟肉", "白切羊肉", "烤鸭", "薰鱼"],
+            "冷菜（素）": ["麻油莴笋", "响铃", "腰果", "红枣", "糖醋藕"],
+            "炒菜（荤）": ["白玉菇炒鲍鱼片", "青椒牛筋", "甜椒牛肉", "芹菜肉丝", "芹菜牛肉", "白菜炒肉", "鲍鱼炒白玉菇", "红烧蛏子", "红烧鱼", "红烧鱼头", "皎白牛筋", "韭菜花牛肉", "芹菜鱿鱼", "山药牛排", "酸菜白肚", "莴笋鲍鱼片", "五花肉卷土豆", "雪菜鲈鱼", "油爆河虾", "榨菜芯炒鱿鱼", "红烧带鱼", "红烧子鱼", "葱油黄鱼", "酱油河虾", "腊肉炒豆角", "牛百叶煲"],
+            "炒菜（素）": ["香菇青菜", "咸白菜炒冬笋", "梅干菜四季豆", "肉沫茄子", "白玉菇炒毛豆", "醋溜白菜", "蒿菜", "酱肉炒豆角", "毛笋炒雪菜", "蒜蓉菠菜", "蒜蓉花菜", "蒜蓉绿花菜", "蒜蓉生菜", "蒜蓉娃娃菜", "笋干菜蒲子", "莴笋炒香菇", "蒜蓉油麦菜", "咸蛋南瓜"],
+            "炖菜": ["油豆腐包咸菜", "萝卜牛排", "土豆闷牛腩", "小排肉", "甲鱼煲", "排骨煲"],
+            "下饭菜": ["荷兰豆炒腊肠", "腊肉扁豆", "雪菜鱿鱼", "榨菜心炒笋肉片", "清蒸咸肉", "清蒸咸肉熏肠", "蒸咸鱼"],
+            "汤": ["鸡肉菌菇汤", "三鲜汤", "榨菜丝笋汤", "榨菜丝汤", "榨菜茭白汤", "紫菜蛋汤"],
+            "糕点": ["饺子", "奶黄包"],
+            "水果": ["小番茄", "哈密瓜", "菠萝蜜"],
+            "一类硬菜": ["红烧蹄膀", "桥排", "红烧肉"],
+            "二类硬菜": ["红烧牛排", "红烧羊排", "鸭煲"],
+            "老总爱吃类": ["香煎带鱼", "香煎大鲳鱼", "红烧蹄膀", "红烧肉", "白切五花肉（厚切，配调料）", "烤红薯", "雪菜笋丝米鱼", "红烧新鲜带鱼（不新鲜不要）"],
+            "蒸菜": ["口蘑蒸鸟蛋", "葱油毛肚", "葱油鲍鱼", "葱油牛百叶", "荷叶鳗", "葱油芋头"]
+        };
+
+        // 菜品数量规则
+        const rules = {
+            "not-participate": {
+                6: {"冷菜（荤）": 1, "冷菜（素）": 1, "炒菜（荤）": 3, "炒菜（素）": 1, "炖菜": 1, "下饭菜": 1, "一类硬菜": 0, "二类硬菜": 1, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                7: {"冷菜（荤）": 2, "冷菜（素）": 1, "炒菜（荤）": 3, "炒菜（素）": 2, "炖菜": 1, "下饭菜": 1, "一类硬菜": 0, "二类硬菜": 1, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                8: {"冷菜（荤）": 2, "冷菜（素）": 1, "炒菜（荤）": 3, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 1, "一类硬菜": 1, "二类硬菜": 0, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                9: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 4, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 1, "一类硬菜": 1, "二类硬菜": 0, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                10: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 4, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                11: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 4, "炒菜（素）": 2, "炖菜": 3, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1},
+                12: {"冷菜（荤）": 3, "冷菜（素）": 2, "炒菜（荤）": 5, "炒菜（素）": 2, "炖菜": 3, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 0, "汤": 1, "糕点": 1, "水果": 1}
+            },
+            "participate": {
+                6: {"冷菜（荤）": 1, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 1, "炖菜": 1, "下饭菜": 1, "一类硬菜": 0, "二类硬菜": 1, "老总爱吃类": 1, "汤": 1, "糕点": 1, "水果": 1},
+                7: {"冷菜（荤）": 2, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 2, "炖菜": 1, "下饭菜": 1, "一类硬菜": 0, "二类硬菜": 1, "老总爱吃类": 1, "汤": 1, "糕点": 1, "水果": 1},
+                8: {"冷菜（荤）": 2, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 1, "一类硬菜": 1, "二类硬菜": 0, "老总爱吃类": 1, "汤": 1, "糕点": 1, "水果": 1},
+                9: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 1, "一类硬菜": 1, "二类硬菜": 0, "老总爱吃类": 2, "汤": 1, "糕点": 1, "水果": 1},
+                10: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 2, "炖菜": 2, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 2, "汤": 1, "糕点": 1, "水果": 1},
+                11: {"冷菜（荤）": 3, "冷菜（素）": 1, "炒菜（荤）": 2, "炒菜（素）": 2, "炖菜": 3, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 2, "汤": 1, "糕点": 1, "水果": 1},
+                12: {"冷菜（荤）": 3, "冷菜（素）": 2, "炒菜（荤）": 3, "炒菜（素）": 2, "炖菜": 3, "下饭菜": 2, "一类硬菜": 1, "二类硬菜": 1, "老总爱吃类": 2, "汤": 1, "糕点": 1, "水果": 1}
+            }
+        };
+
+        // 存储当前生成的菜单数据
+        let currentMenuData = [];
+        let totalDishes = 0;
+        let bossAttendance = "";
+        let dinerCount = 0;
+
+        // 从数组中随机选择不重复的元素
+        function getRandomItems(array, count) {
+            if (count > array.length) {
+                console.warn(`请求的数量(${count})大于数组长度(${array.length})，返回所有元素`);
+                return [...array];
+            }
+            
+            const shuffled = [...array].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // 生成菜单
+        function generateMenu() {
+            bossAttendance = document.getElementById('boss-attendance').value;
+            dinerCount = parseInt(document.getElementById('diner-count').value);
+            
+            // 获取对应的规则
+            const rule = rules[bossAttendance][dinerCount];
+            
+            // 用于跟踪已选择的菜品，避免重复
+            const selectedDishes = new Set();
+            
+            // 重置菜单数据
+            currentMenuData = [];
+            totalDishes = 0;
+            
+            // 对每个类别选择菜品
+            for (const [category, count] of Object.entries(rule)) {
+                if (count === 0) continue;
+                
+                // 获取该类别所有可用的菜品
+                const availableDishes = dishes[category].filter(dish => !selectedDishes.has(dish));
+                
+                // 随机选择指定数量的菜品
+                const selected = getRandomItems(availableDishes, count);
+                
+                // 添加到已选择集合中
+                selected.forEach(dish => selectedDishes.add(dish));
+                
+                // 添加到菜单数据中
+                currentMenuData.push({
+                    category,
+                    count,
+                    dishes: selected
+                });
+                
+                totalDishes += count;
+            }
+            
+            // 渲染菜单表格
+            renderMenuTable();
+            
+            // 显示下载区域
+            document.getElementById('download-section').style.display = 'block';
+        }
+
+        // 渲染菜单表格
+        function renderMenuTable() {
+            const container = document.getElementById('menu-table-container');
+            
+            // 创建表格
+            let html = `
+                <div class="note">
+                    当前条件：<strong>${bossAttendance === 'participate' ? '老总参与就餐' : '老总不参与就餐'}</strong>，就餐人数：<strong>${dinerCount}人</strong>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="25%">类别</th>
+                            <th width="15%">菜品数量</th>
+                            <th width="60%">菜品名称</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // 添加每个类别的菜品
+            currentMenuData.forEach(item => {
+                html += `
+                    <tr class="category-header">
+                        <td>${item.category}</td>
+                        <td>${item.count}个</td>
+                        <td></td>
+                    </tr>
+                `;
+                
+                // 添加该类别的每个菜品
+                item.dishes.forEach(dish => {
+                    html += `
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>${dish}</td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            // 添加总计行
+            html += `
+                    <tr class="total-row">
+                        <td><strong>总计</strong></td>
+                        <td class="total-count"><strong>${totalDishes}个</strong></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // 生成并下载Excel文件
+        function downloadExcel() {
+            // 创建Excel工作簿
+            const wb = XLSX.utils.book_new();
+            
+            // 准备Excel数据
+            const excelData = [];
+            
+            // 添加标题行
+            excelData.push(["菜单详情", "", ""]);
+            excelData.push(["生成条件", `${bossAttendance === 'participate' ? '老总参与就餐' : '老总不参与就餐'}，就餐人数：${dinerCount}人`, ""]);
+            excelData.push([]); // 空行
+            excelData.push(["类别", "菜品数量", "菜品名称"]);
+            
+            // 添加每个类别的数据
+            currentMenuData.forEach(item => {
+                // 类别标题行
+                excelData.push([item.category, item.count, ""]);
+                
+                // 菜品行
+                item.dishes.forEach(dish => {
+                    excelData.push(["", "", dish]);
+                });
+            });
+            
+            // 总计行
+            excelData.push([]); // 空行
+            excelData.push(["总计", totalDishes, ""]);
+            
+            // 创建工作表
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            
+            // 设置列宽
+            const wscols = [
+                { wch: 15 }, // 第一列宽度
+                { wch: 12 }, // 第二列宽度
+                { wch: 40 }  // 第三列宽度
+            ];
+            ws['!cols'] = wscols;
+            
+            // 合并标题单元格
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }, // 合并第一行
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } }  // 合并第二行
+            ];
+            
+            // 将工作表添加到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, "菜单");
+            
+            // 生成Excel文件并下载
+            const fileName = `菜单_${bossAttendance === 'participate' ? '老总参与' : '老总不参与'}_${dinerCount}人_${new Date().getTime()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定生成按钮事件
+            document.getElementById('generate-btn').addEventListener('click', generateMenu);
+            
+            // 绑定下载按钮事件
+            document.getElementById('download-btn').addEventListener('click', downloadExcel);
+            
+            // 初始生成一个菜单（默认条件：老总参与，11人）
+            generateMenu();
+        });
+    </script>
+</body>
+</html>
